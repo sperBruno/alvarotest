@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<testsuite failures="0" name="cucumber.runtime.formatter.JUnitFormatter" skipped="0" tests="2" time="22.34636">
+<testcase classname="Testing for login  page" name="Login with valid credentials" time="18.490007">
+<system-out><![CDATA[Given I login with valid credentials........................................passed
+Then I expect the userName is displayed.....................................passed
+]]></system-out>
+</testcase>
+<testcase classname="Testing for login  page" name="Adding a user client" time="3.856353">
+<system-out><![CDATA[Given I am on catalog page..................................................passed
+And I insert a user client information......................................passed
+Then I expect the userName is create sucessfully............................passed
+]]></system-out>
+</testcase>
+</testsuite>

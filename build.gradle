@@ -1,0 +1,92 @@
+import net.masterthought.cucumber.Configuration
+import net.masterthought.cucumber.ReportBuilder
+group 'com.udabol.superclean'
+version '1.0-SNAPSHOT'
+apply plugin: 'java'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.5
+
+repositories {
+    jcenter()
+}
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url "http://repo.bodar.com"
+        }
+    }
+
+    dependencies {
+        classpath 'net.masterthought:cucumber-reporting:2.5.0'
+    }
+}
+dependencies {
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version:'2.53.0'
+    compile group: 'com.jayway.restassured', name: 'rest-assured', version:'2.9.0'
+    compile group: 'log4j', name: 'log4j', version:'1.2.17'
+    testCompile group: 'info.cukes', name: 'cucumber-java', version:'1.2.4'
+    testCompile group: 'info.cukes', name: 'cucumber-junit', version:'1.2.4'
+    testCompile group: 'info.cukes', name: 'cucumber-picocontainer', version:'1.2.4'
+    // https://mvnrepository.com/artifact/net.masterthought/cucumber-reporting
+    compile group: 'net.masterthought', name: 'cucumber-reporting', version: '3.8.0'
+
+}
+configurations {
+    cucumberRuntime {
+        extendsFrom testRuntime
+    }
+}
+task executeFeatures() {
+    dependsOn assemble, compileTestJava
+    doLast {
+
+        File file = new File("cucumber-superclean-report")
+        file.delete()
+        try {
+            //showStandardStreams = true
+            javaexec {
+                main = "cucumber.api.cli.Main"
+                classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+                args = ['--plugin', 'pretty',
+                        '--plugin', 'html:test-report/test-report',
+                        '--plugin', 'json:test-report/test-report.json',
+                        '--plugin', 'rerun:test-report/rerun.txt',
+                        '--glue', 'com.udabol.superclean.cucumber', 'src/test/resources/']
+//                jvmArgs = ["-Dcucumber.options=" + cucumberOptions]
+//                jvmArgs = ["-DurlApi=" + urlApi]
+                jvmArgs = ["-Demail=" + email]
+                jvmArgs = ["-Dpassword=" + password]
+//                jvmArgs = ["-DapiToken=" + apiToken]
+                jvmArgs = ["-Dbrowser=" + browser]
+
+//                jvmArgs = ["-DremoteUser=" + remoteUser]
+//                jvmArgs = ["-DremoteAccessKey=" + remoteAccessKey]
+//                jvmArgs = ["-DremoteBrowser=" + remoteBrowser]
+//                jvmArgs = ["-DremoteBrowserVersion" + remoteBrowserVersion]
+//                jvmArgs = ["-DremotePlatform" + remotePlatform]
+//                systemProperty "remoteTestHostUrl", remoteTestHostUrl
+            }
+        } catch (Exception e) {
+            println("unable to execute task, see the next detail: " + e)
+        }
+        sleep(5000) // sleep due to cucumber.json is not created too fast
+        generateReport("test-report/test-report.json", "test-report/cucumber-report")
+    }
+}
+
+def generateReport(String pathCucumber, String pathReport) {
+    File reportOutputDirectory = new File(pathReport)
+    List<String> jsonReportFiles = new ArrayList<>()
+    jsonReportFiles.add(pathCucumber)
+    String buildProjectName = "superclean-test"
+    Configuration configuration = new Configuration(reportOutputDirectory, buildProjectName)
+    ReportBuilder reportBuilder = new ReportBuilder(jsonReportFiles, configuration)
+    reportBuilder.generateReports()
+}
+
+
+
+
+
